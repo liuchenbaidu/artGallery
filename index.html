@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Art Gallery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        p {
+            font-size: 18px;
+        }
+
+        input[type="file"] {
+            font-size: 16px;
+            padding: 10px;
+            margin: 20px;
+            cursor: pointer;
+        }
+
+        .gallery {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .gallery img {
+            width: 200px;
+            margin: 10px;
+            border: 2px solid #ccc;
+            transition: transform 0.2s;
+        }
+
+        .gallery img:hover {
+            transform: scale(1.1);
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Art Gallery</h1>
+    <p>Upload a drawing to add it to the gallery! (Use your phone's camera for best results)</p>
+    <input type="file" accept="image/*" capture="camera" onchange="addDrawing(event)">
+    <div class="gallery" id="gallery"></div>
+
+    <script>
+        const images = JSON.parse(localStorage.getItem('images')) || [];
+
+        function addDrawing(event) {
+            const file = event.target.files[0];
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file.');
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    images.push(e.target.result);
+                    localStorage.setItem('images', JSON.stringify(images));
+                    renderGallery();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function renderGallery() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+            images.forEach((src, index) => {
+                const imgContainer = document.createElement('div');
+                imgContainer.style.position = 'relative';
+
+                const img = document.createElement('img');
+                img.src = src;
+                imgContainer.appendChild(img);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerText = 'X';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.onclick = () => {
+                    images.splice(index, 1);
+                    localStorage.setItem('images', JSON.stringify(images));
+                    renderGallery();
+                };
+                imgContainer.appendChild(deleteBtn);
+
+                gallery.appendChild(imgContainer);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', renderGallery);
+    </script>
+</body>
+</html>
